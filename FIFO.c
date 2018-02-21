@@ -15,6 +15,30 @@ static sint8 FIFOIndex = 0;
 static sint8 FIFO[FIFO_LENGHT];
 static sint8 currentValue = 0;
 
+
+
+int8_t h1[7] = {
+0.07840464525404556,
+0.17707825519483075,
+0.22014353249171387,
+0.2759015644497544,
+0.22014353249171387,
+0.17707825519483075,
+0.07840464525404556
+};
+
+
+int8_t h2[7] ={
+-0.08857280384687653,
+-0.20001387909943527,
+-0.13289448474069163,
+0.7755518089951376,
+-0.13289448474069163,
+-0.20001387909943527,
+-0.08857280384687653
+};
+
+
 sint8 pop ()
 {
     if (empty)
@@ -37,7 +61,7 @@ sint8 pop ()
 
 BooleanType manage()
 {
-    currentValue = (2*FIFO[0] + FIFO[1] + FIFO[2] + FIFO[3] + FIFO[5] + FIFO[6])/8;
+    currentValue = (h1[0]*FIFO[0] + h1[1]*FIFO[1] + h1[2]*FIFO[2] + h1[3]*FIFO[3] + h1[4]*FIFO[4] + h1[5]*FIFO[5] + + h1[6]*FIFO[6]);
     pop();
     initDAC();
     DACFunction(PIT_0, (uint8) currentValue);
