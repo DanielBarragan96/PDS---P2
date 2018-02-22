@@ -65,7 +65,6 @@ dac_config_t dacConfigStruct;
 void PIT0_IRQHandler ()
 {
     PIT_ClearStatusFlags (PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-
     sint8 read = (sint8) ADC_Values();
     printf(" %d\n",read);
     push (read);
@@ -99,12 +98,6 @@ int main (void)
 
     PIT_SetTimerPeriod (PIT, kPIT_Chnl_0, LDVAL_trigger);
     PIT_StartTimer (PIT, kPIT_Chnl_0);
-
-//    Configures the DAC.
-//    DAC_GetDefaultConfig(&dacConfigStruct);
-//    DAC_Init(DAC0, &dacConfigStruct);
-//    DAC_Enable(DAC0, true);
-//    DAC_SetBufferReadPointer(DAC0, 0U);
 
     while (1)
     {

@@ -13,6 +13,7 @@ static BooleanType empty = TRUE;
 static sint8 FIFOIndex = 0;
 //FIFO array
 static sint8 FIFO[FIFO_LENGHT];
+
 static sint8 currentValue = 0;
 
 
@@ -37,7 +38,6 @@ int8_t h2[7] ={
 -0.20001387909943527,
 -0.08857280384687653
 };
-
 
 sint8 pop ()
 {
