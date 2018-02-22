@@ -40,25 +40,34 @@
 #include "MK64F12.h"
 #include "fsl_pit.h"
 #include "fsl_adc16.h"
+#include "ADC.h"
+#include "FIFO.h"
+#include "PIT.h"
+#include "DAC.h"
+#include "fsl_dac.h"
 
 //the system clock of the Kinetis
 #define SYSTEM_CLOCK CLOCK_GetBusClkFreq()
 //period for the pit to get 1 second
 #define PERIOD 1/41000.00
 //pit number to count
-#define LDVAL_trigger  (SYSTEM_CLOCK * PERIOD)
+#define LDVAL_trigger  (SYSTEM_CLOCK * PERIOD)/20
+
+uint8_t contador=0;
+int8_t conv[7] = {0};
 
 adc16_config_t adc16ConfigStruct;
 adc16_channel_config_t adc16ChannelConfigStruct;
 ADC_Type *base = ADC0;
 uint32_t channelGroup = 0;
+dac_config_t dacConfigStruct;
 
 void PIT0_IRQHandler ()
 {
     PIT_ClearStatusFlags (PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-
-    uint32_t read = ADC16_GetChannelConversionValue(base, channelGroup);
+    sint8 read = (sint8) ADC_Values();
     printf(" %d\n",read);
+    push (read);
 
     PIT_SetTimerPeriod (PIT, kPIT_Chnl_0, LDVAL_trigger);
     PIT_StartTimer (PIT, kPIT_Chnl_0);
@@ -66,7 +75,6 @@ void PIT0_IRQHandler ()
 
 int main (void)
 {
-
     /* Init board hardware. */
     BOARD_InitBootPins ();
     BOARD_InitBootClocks ();
@@ -80,28 +88,13 @@ int main (void)
 
     CLOCK_EnableClock (kCLOCK_PortE);
 
-    // Input pin PORT configuration P-833 SDK
-    const port_pin_config_t config =
-            {
-                kPORT_PullDisable,
-                kPORT_FastSlewRate,
-                kPORT_PassiveFilterDisable,
-                kPORT_OpenDrainDisable,
-                kPORT_LowDriveStrength,
-                kPORT_MuxAsGpio,
-                kPORT_UnlockRegister,
-            };
-
-    PORT_SetPinConfig(PORTE, 2, &config);//BLUE
+    ADC_init();
+    initDAC();
 
     pit_config_t pit_config =  { true };
     PIT_Init (PIT, &pit_config);
     PIT_EnableInterrupts (PIT, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
     EnableIRQ (PIT0_IRQn);
-
-    ADC16_GetDefaultConfig (&adc16ConfigStruct);
-    ADC16_Init (ADC0, &adc16ConfigStruct);
-    ADC16_SetChannelConfig (ADC0, 1, &adc16ChannelConfigStruct); //PTE2 ADC0_DP2
 
     PIT_SetTimerPeriod (PIT, kPIT_Chnl_0, LDVAL_trigger);
     PIT_StartTimer (PIT, kPIT_Chnl_0);
